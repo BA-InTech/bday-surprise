@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEYHTML-BOY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier New', Courier, monospace;
+      background-color: black;
+      color: lime;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      overflow: hidden; /* Prevent scrollbar during loader animation */
+    }
+
+    #loader {
+      text-align: center;
+    }
+
+    .progress {
+      width: 300px;
+      height: 20px;
+      background-color: #333;
+      border: 2px solid lime;
+      margin: 10px auto;
+      position: relative;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0;
+      background-color: lime;
+    }
+
+    #percent {
+      margin-top: 5px;
+      color: lime;
+      font-weight: bold;
+    }
+
+    #preparing-text {
+      margin-bottom: 5px;
+    }
+
+    #gameboy {
+      background: #e5e5dc;
+      border: 5px solid #b3b3b3;
+      border-radius: 30px;
+      padding: 20px;
+      width: 340px; 
+      height: 560px; 
+      text-align: center;
+      box-shadow: 0 0 25px lime;
+      position: relative;
+      font-family: 'Press Start 2P', monospace;
+      display: none; /* Initially hidden, set by JS */
+      flex-direction: column;
+      justify-content: space-around; /* Distribute space between main elements */
+      opacity: 0; /* For fade-in animation */
+      transition: opacity 0.6s ease-in; /* Fade-in transition for #gameboy */
+    }
+    #gameboy.visible {
+        opacity: 1;
+    }
+
+    .screen-area { 
+        margin-bottom: 10px;
+    }
+
+    .screen {
+      background-color: #0b280b;
+      color: lime;
+      padding: 15px 12px; /* Slight padding adjustment */
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.5; /* For spacing between lines */
+      font-weight: bold;
+      margin-bottom: 5px;
+      box-shadow: inset 0 0 10px #000;
+      border: 4px solid #111;
+      min-height: 55px; 
+    }
+
+    .subtext {
+      color: #ffd700;
+      font-size: 10px;
+      display: block; /* To be on a new line */
+      margin-top: 5px;
+    }
+
+    .screen-info {
+      margin-top: 5px;
+      font-size: 8px;
+      color: gray;
+    }
+
+    .battery {
+      font-size: 8px;
+      color: red;
+      float: right;
+      margin-right: 10px;
+    }
+
+    .btn-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0; 
+    }
+
+    .btn {
+      padding: 10px 0;
+      font-family: 'Press Start 2P', monospace;
+      font-weight: bold;
+      color: white;
+      border: 2px solid black;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 10px;
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+    }
+     .btn:active {
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+        transform: translate(2px, 2px);
+    }
+
+    .blue { background-color: #339dff; }
+    .red { background-color: #e0412f; }
+    .purple { background-color: #9a79df; }
+    .green { background-color: #61d66a; }
+
+    .start-select-container-revised {
+      margin: 10px auto 10px auto; 
+      text-align: center;
+    }
+    .start-select-container-revised button {
+      margin: 0 8px;
+      background-color: #4a4a4a; 
+      color: white;
+      padding: 6px 15px;
+      border-radius: 15px; 
+      border: 1px solid #222;
+      font-size: 8px;
+      font-family: 'Press Start 2P', monospace;
+      text-transform: uppercase; 
+      cursor: pointer;
+    }
+     .start-select-container-revised button:active { transform: translateY(1px); }
+
+    .dpad-ab-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px; 
+      padding: 0 10px; 
+    }
+
+    .dpad-wrapper { /* No special style needed if D-Pad is already set up */ }
+    .dpad {
+      width: 50px; height: 50px;
+      position: relative;
+    }
+    .dpad::before, .dpad::after {
+      content: ''; position: absolute;
+      background-color: #222; border-radius: 2px; 
+    }
+    .dpad::before { width: 50px; height: 16px; top: 17px; left: 0; }
+    .dpad::after { width: 16px; height: 50px; top: 0; left: 17px; }
+
+    .ab-buttons-wrapper { display: flex; align-items: center; }
+    .circle-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background-color: #d9534f; border: 1px solid #a94442; 
+      margin: 0 5px; cursor: pointer;
+      color: white; font-weight: bold;
+      font-family: 'Press Start 2P', monospace; font-size: 10px;
+      line-height: 38px; text-align: center;
+    }
+    .circle-btn:active { transform: translateY(1px); }
+
+    .branding {
+      position: absolute; top: 10px; left: 20px;
+      font-size: 9px; color: #d9534f; font-weight: bold;
+    }
+    .branding-right {
+      position: absolute; top: 10px; right: 20px;
+      font-size: 9px; color: #333; font-weight: bold;
+    }
+
+    /* Class for animating child elements of #gameboy */
+    .gb-anim-child {
+        opacity: 0;
+        transform: translateY(15px); /* Start slightly from the bottom */
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+    .gb-anim-child.shown {
+        opacity: 1;
+        transform: translateY(0); /* Return to normal position */
+    }
+  </style>
+</head>
+<body>
+  <div id="loader">
+    <h1>HEYHTML-BOY</h1>
+    <p id="preparing-text">&gt; PREPARING BIRTHDAY SURPRISE...</p>
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+    <div id="percent">0%</div>
+    <p>SMILE!</p>
+  </div>
+
+  <div id="gameboy"> <div class="branding">POWER</div>
+    <div class="branding-right">HEYHTML-BOY</div>
+    
+    <div class="screen-area gb-anim-child">
+        <div class="screen" id="mainScreen">
+            Happy Birthday!<br><span class="subtext">Press Start Button</span>
+        </div>
+        <div class="screen-info" id="screenInfo">
+            DOT MATRIX WITH STEREO SOUND <span class="battery">● BATTERY</span>
+        </div>
+    </div>
+
+    <div class="btn-container gb-anim-child" id="mainBtnContainer">
+        <button class="btn blue" onclick="window.location.href='message.html'">MESSAGE</button>
+        <button class="btn red" onclick="window.location.href='gallery.html'">GALLERY</button>
+        <button class="btn purple" onclick="window.location.href='music_player.html'">MUSIC</button>
+        <button class="btn green" onclick="window.location.href='tetris_game.html'">TETRIS</button>
+    </div>     
+    
+    <div class="start-select-container-revised gb-anim-child" id="startSelectContainer">
+      <button onclick="startGameboy()">SELECT</button>
+      <button onclick="startGameboy()">START</button>
+    </div>
+    
+    <div class="dpad-ab-container gb-anim-child">
+      <div class="dpad-wrapper">
+        <div class="dpad" id="dpad"></div>
+      </div>
+      <div class="ab-buttons-wrapper" id="abButtonsContainer">
+        <button class="circle-btn" id="btnB">B</button>
+        <button class="circle-btn" id="btnA">A</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let width = 0;
+    const bar = document.getElementById('bar');
+    const loader = document.getElementById('loader');
+    const gameboy = document.getElementById('gameboy');
+    const percentText = document.getElementById('percent');
+    const preparingText = document.getElementById('preparing-text');
+
+    const interval = setInterval(() => {
+      if (width >= 100) {
+        clearInterval(interval);
+        loader.style.display = 'none'; // Hide loader
+        
+        gameboy.style.display = 'flex'; // Display Gameboy container (still opacity 0)
+        
+        // Trigger opacity transition for #gameboy after display is changed
+        setTimeout(() => { 
+            gameboy.classList.add('visible'); // #gameboy fade in (0.6s duration from CSS)
+        }, 50); // Small delay
+
+        // Get all child elements to be animated
+        const elementsToAnimate = gameboy.querySelectorAll('.gb-anim-child');
+        
+        // Initial delay before the first child appears (after #gameboy starts fading in)
+        // Adjust to synchronize with the completion of the #gameboy transition
+        const initialDelayForFirstChild = 400; // E.g., after 0.4s from #gameboy starting to fade in
+        const staggerAmount = 150; // Stagger amount between child element appearances (0.15s)
+
+        elementsToAnimate.forEach((el, index) => {
+            setTimeout(() => {
+                el.classList.add('shown');
+            }, initialDelayForFirstChild + (index * staggerAmount)); 
+        });
+
+      } else {
+        width++;
+        bar.style.width = width + '%';
+        percentText.textContent = width + '%';
+
+        if (width === 70) {
+          preparingText.textContent = '> READY!';
+        }
+      }
+    }, 50);
+
+    function startGameboy() {
+      const mainScreenText = document.querySelector('#mainScreen');
+      // Check if the initial message is still there
+      if (mainScreenText && mainScreenText.innerHTML.includes("Press Start Button")) {
+          mainScreenText.innerHTML = "THE SURPRISE BEGINS!<br><span class='subtext'>Choose an option!</span>";
+      } else {
+          // If the message has already changed, maybe perform another action or do nothing
+          // alert("Button Pressed! 🎉"); 
+      }
+    }
+  </script>
+</body>
+</html>
