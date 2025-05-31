@@ -1,0 +1,409 @@
+GALLERY
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEYHTML-BOY - Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Press Start 2P', Courier, monospace;
+      background-color: black;
+      color: lime;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .gallery-container {
+      background: #1a1a1a;
+      border: 5px solid #333;
+      border-radius: 20px;
+      padding: 20px;
+      width: 340px;
+      height: 540px; 
+      text-align: center;
+      box-shadow: 0 0 20px lime;
+      font-family: 'Press Start 2P', monospace;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-header {
+        margin-bottom: 10px;
+    }
+
+    .gallery-title {
+      color: lime;
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .gallery-subtitle {
+      color: #cccccc;
+      font-size: 10px;
+      margin-bottom: 10px;
+    }
+
+    .status-bars {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 0 5px;
+    }
+    .status-bar { height: 8px; width: 47%; border-radius: 5px; }
+    .status-bar-red { background-color: #e0412f; }
+    .status-bar-green { background-color: #61d66a; }
+
+    .interactive-area {
+      background-color: #000000;
+      border-radius: 8px;
+      border: 2px solid #444;
+      flex-grow: 1; 
+      padding: 15px 10px; /* Padding adjustment */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; 
+      align-items: center;
+      min-height: 250px; 
+      overflow-y: auto; /* Make this area scrollable if content is long */
+    }
+
+    .photobox-initial-screen p {
+      color: #ffffff;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .btn-mulai-cetak { /* Class name kept for CSS, text inside translated */
+      background-color: #e0412f; color: white;
+      font-family: 'Press Start 2P', monospace; font-size: 13px;
+      padding: 12px 22px; border: none; border-radius: 5px;
+      cursor: pointer; box-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+    }
+    .btn-mulai-cetak:active {
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+        transform: translate(2px, 2px);
+    }
+
+    .photo-display-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Start from the top, so it can scroll if there's a video */
+      width: 100%;
+      height: 100%; /* Fills interactive-area */
+    }
+
+    .photo-frame {
+      background-color: #ffffff; border: 1px solid #dedede;
+      padding: 10px; margin-bottom: 10px; /* Slightly reduce bottom margin */
+      width: 80%; max-width: 220px; 
+      box-shadow: 3px 3px 5px rgba(255,255,255,0.1);
+      color: #333333; font-size: 10px;
+      position: relative;
+      flex-shrink: 0; /* Prevent frame from shrinking if there's other content */
+    }
+
+    .photo-frame img {
+      width: 100%; height: 160px; /* Slightly reduce image height for video space */
+      object-fit: cover; display: block;
+      margin-bottom: 8px; background-color: #e0e0e0;
+    }
+    
+    .photo-frame .icon-pin {
+        position: absolute; bottom: 30px; left: 8px;
+        width: 16px; height: 16px;
+        background-color: gold; border-radius: 3px;
+    }
+
+    .photo-caption { padding: 3px 0; min-height: 12px; }
+
+    .photo-nav-buttons {
+      display: flex; justify-content: center;
+      gap: 15px; margin-top: 5px; /* Reduce top margin */
+      margin-bottom: 15px; /* Distance to video dump */
+      flex-shrink: 0;
+    }
+
+    .btn-photo-nav {
+      background-color: #555; color: white;
+      font-family: 'Press Start 2P', monospace; font-size: 10px;
+      padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    .btn-photo-nav:active { background-color: #333; }
+
+    /* Styles for Video Dump */
+    .video-dump-container {
+      margin-top: 10px; /* Distance from photo navigation */
+      width: 90%;
+      max-width: 260px; /* Adjust to photo frame width */
+      text-align: center;
+      flex-shrink: 0; /* Prevent shrinking */
+    }
+
+    .video-dump-title {
+      color: #ffd700; /* Yellow */
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .video-player-wrapper {
+      background-color: #000;
+      border: 3px solid #ffd700; /* Yellow border */
+      padding: 4px; /* Thin padding around video */
+      border-radius: 5px;
+      position: relative; /* For potential overlay if poster has no text */
+    }
+
+    #clipDumpVideo {
+      display: block;
+      width: 100%;
+      /* height: auto; let height be automatic or set max-height */
+      max-height: 150px; /* Limit video height, adjust */
+    }
+    
+    /* Overlay for text if poster is missing (example, can be removed if poster is sufficient) */
+    .video-overlay-text {
+        /* Styling if you want a custom overlay on the video before play */
+        /* position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); */
+        /* color: white; font-size: 11px; display: none; pointer-events: none; */
+    }
+    .video-overlay-text .video-date { font-size: 9px; color: #bbb; margin-top: 4px; display: block; }
+
+
+    .gallery-controls { /* Main BACK & NEXT buttons */
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+      margin-top: auto; /* Pushes to the very bottom of the container */
+      padding-top: 15px; /* Distance from content above it */
+      width: 100%; flex-shrink: 0;
+    }
+
+    .btn-gallery {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px; color: white;
+      padding: 12px 10px; border: none; border-radius: 5px;
+      cursor: pointer; width: 80%; max-width: 180px;
+      text-align: center; box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .btn-gallery:active {
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+        transform: translate(2px, 2px);
+    }
+    .btn-gallery-next { background-color: #61d66a; }
+    .btn-gallery-back { background-color: #e0412f; }
+
+  </style>
+</head>
+<body>
+  <div class="gallery-container">
+    <div class="gallery-header">
+        <div class="gallery-title">Gallery</div>
+        <div class="gallery-subtitle">HEYTML PHOTOBOX</div>
+    </div>
+
+    <div class="status-bars">
+        <div class="status-bar status-bar-red"></div>
+        <div class="status-bar status-bar-green"></div>
+    </div>
+
+    <div class="interactive-area" id="interactiveArea">
+        <div id="photoboxInitialScreen">
+            <p>Photobox ready to use!</p>
+            <button class="btn-mulai-cetak" onclick="startPhotoboxPrint()">START PRINTING</button>
+        </div>
+
+        <div class="photo-display-area" id="photoDisplayScreen" style="display: none;">
+            <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Selected Photo">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Photo caption</div>
+            </div>
+            <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Selected Photo"> <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Photo caption</div> </div>
+            
+            <div class="photo-nav-buttons">
+                <button class="btn-photo-nav" onclick="prevPhoto()">▲ UP</button>
+                <button class="btn-photo-nav" onclick="nextPhoto()">▼ DOWN</button>
+            </div>
+
+                    <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+        <div class="photo-frame">
+                <img id="currentPhoto" src="" alt="Foto Pilihan">
+                <div class="icon-pin" style="display: none;"></div>
+                <div class="photo-caption" id="currentPhotoCaption">Caption foto</div>
+            </div>
+
+            <div class="video-dump-container" id="videoDumpSection">
+                <div class="video-dump-title">Clip Dump</div>
+                <div class="video-player-wrapper">
+                    <video id="clipDumpVideo" controls 
+                           poster="https://via.placeholder.com/250x140.png?text=Click+to+play+video%0AClip+Dump%0A20/04/25">
+                        <source src="videos/placeholder_clipdump.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gallery-controls">
+      <button class="btn-gallery btn-gallery-next" onclick="mainGalleryNextAction()">NEXT</button>
+      <button class="btn-gallery btn-gallery-back" onclick="goBack()">BACK</button>
+    </div>
+  </div>
+
+  <script>
+    const photoSources = [
+        { src: "https://via.placeholder.com/220x160.png?text=Photo+1", caption: "First Memory", showPin: true },
+        { src: "https://via.placeholder.com/220x160.png?text=Photo+2", caption: "Birthday", showPin: false },
+        // ... (18 other photo data entries like before, ensure image paths are correct and text parameters in URLs are updated if necessary) ...
+        { src: "https://via.placeholder.com/220x160.png?text=Photo+20", caption: "Special Surprise!", showPin: true }
+    ];
+
+    let currentPhotoIndex = 0;
+
+    const initialScreen = document.getElementById('photoboxInitialScreen');
+    const photoDisplayScreen = document.getElementById('photoDisplayScreen');
+    const currentPhotoImg = document.getElementById('currentPhoto'); // Will get the first element with this ID
+    const currentPhotoCaption = document.getElementById('currentPhotoCaption'); // Will get the first element with this ID
+    const iconPinElement = photoDisplayScreen.querySelector('.icon-pin'); // Will get the first within photoDisplayScreen
+    // const videoDumpSection = document.getElementById('videoDumpSection'); // No specific JS interaction needed at this time
+
+    function displayPhoto(index) {
+        if (index >= 0 && index < photoSources.length) {
+            const photoData = photoSources[index];
+            currentPhotoImg.src = photoData.src;
+            currentPhotoImg.alt = photoData.caption || `Photo ${index + 1}`; // Alt text translated
+            currentPhotoCaption.textContent = photoData.caption || "";
+            if (iconPinElement) {
+                iconPinElement.style.display = photoData.showPin ? 'block' : 'none';
+            }
+        }
+    }
+
+    function startPhotoboxPrint() {
+      if (initialScreen && photoDisplayScreen) {
+        initialScreen.style.display = 'none';
+        photoDisplayScreen.style.display = 'flex';
+        currentPhotoIndex = 0;
+        displayPhoto(currentPhotoIndex);
+        // Ensure video player is also visible (though it should be as part of photoDisplayScreen)
+        // videoDumpSection.style.display = 'block'; // Should already be visible as it's inside photoDisplayScreen
+      }
+    }
+
+    function nextPhoto() {
+      currentPhotoIndex = (currentPhotoIndex + 1) % photoSources.length;
+      displayPhoto(currentPhotoIndex);
+    }
+
+    function prevPhoto() {
+      currentPhotoIndex = (currentPhotoIndex - 1 + photoSources.length) % photoSources.length;
+      displayPhoto(currentPhotoIndex);
+    }
+
+    function mainGalleryNextAction() {
+      alert("Main NEXT button pressed!"); // Alert message translated
+    }
+
+    function goBack() {
+      window.location.href = 'index.html'; // 'index.html' is already English
+    }
+  </script>
+</body>
+</html>

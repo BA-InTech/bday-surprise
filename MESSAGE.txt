@@ -1,0 +1,248 @@
+MESSAGE
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message For You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Press Start 2P', monospace;
+      background-color: #0d0d0d; /* Sedikit beda dari #111 agar ada kontras jika perlu */
+      color: #f0f0f0; /* Warna teks default lebih lembut */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh; /* Untuk konten yang mungkin lebih panjang dari layar */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .message-screen-container { /* Mengganti nama dari .message-screen agar lebih jelas */
+      background-color: #081c08; /* Hijau sangat gelap, lebih pekat dari #0b280b */
+      border: 4px solid #225522; /* Border hijau tua */
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px; /* Lebar maksimum agar teks tidak terlalu panjang per baris */
+      color: lime;
+      font-family: 'Press Start 2P', monospace;
+      text-align: left;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3), inset 0 0 12px #000;
+    }
+
+    .message-screen-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 16px; /* Ukuran judul disesuaikan */
+      color: #afffba; /* Warna judul lebih terang */
+    }
+    
+    #messageOutput {
+        font-family: 'Courier New', Courier, monospace; /* Font berbeda untuk isi pesan */
+        font-size: 14px; /* Ukuran font isi pesan */
+        line-height: 1.7;
+        white-space: pre-wrap; /* Menghargai spasi dan baris baru dari JS */
+        min-height: 150px; /* Tinggi minimum area pesan */
+        max-height: 300px; /* Tinggi maksimum sebelum scroll jika banyak halaman */
+        overflow-y: auto;  /* Scroll jika konten melebihi max-height */
+        border: 1px dashed rgba(0, 255, 0, 0.2);
+        padding: 10px;
+        margin-bottom: 20px;
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 5px;
+    }
+
+    .msg-buttons-container { /* Wrapper untuk semua tombol bawah */
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column; /* Tombol SKIP di atas NEXT/BACK */
+        gap: 10px;
+    }
+    
+    .msg-page-controls {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .msg-buttons-container button {
+      font-family: 'Press Start 2P', monospace;
+      padding: 10px; /* Padding lebih besar */
+      font-size: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+    }
+    .msg-buttons-container button:active {
+        box-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+        transform: translate(1px, 1px);
+    }
+
+
+    .green-btn { background-color: #4CAF50; color: white; flex-grow: 1; } /* Warna hijau lebih standar */
+    .red-btn { background-color: #f44336; color: white; flex-grow: 1; } /* Warna merah lebih standar */
+    .blue-btn { background-color: #2196F3; color: white; width: 100%;} /* Warna biru lebih standar */
+    
+    button:disabled {
+        background-color: #555 !important;
+        color: #aaa !important;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="message-screen-container">
+    <h2>A Message For You</h2>
+    <div id="messageOutput"></div> <div class="msg-buttons-container">
+        <button class="blue-btn" id="skipBtn" onclick="skipMessage()">SKIP TYPING / TO INDEX</button>
+        <div class="msg-page-controls">
+            <button class="red-btn" id="prevBtn" onclick="prevMessage()" disabled>&lt; PREV</button>
+            <button class="green-btn" id="nextBtn" onclick="nextMessage()">NEXT &gt;</button>
+        </div>
+        <button class="red-btn" id="backToMainBtn" onclick="backToMain()" style="margin-top:10px; background-color: #772222;">BACK TO MAIN MENU</button>
+    </div>
+  </div>
+
+  <script>
+    // Pisahkan teks asli dari HTML untuk efek ketik yang bersih
+    // Saya akan membuat array dari string, setiap string adalah satu "halaman"
+    const messagePages = [
+        "To Abdulmajed Abdullahi, my soulmate who was born on June 1st, 2003,\n\nHappy birthday, my love.\nToday, the world celebrates you and I feel even more thankful because you are part of my life sayang.",
+        "Even though we’re separated by oceans and a 4-hour time difference, my heart has never been far from you sayang. While I may be starting a new day and you're still in the night before, my thoughts are always with you every hour, every moment.",
+        "You are my home one that I can't visit physically, but always return to in my heart.",
+        "When you say \"I miss you sayang\" and \"I want you,\" I feel it too deeply. Sometimes, I miss you even more than I can express. And when you say you want me, it makes me feel so loved, so wanted like I truly matter in this world.",
+        "But there's one thing that always touches me deeply: when you love me more than I love you.\nI feel it through your care, your patience, your quiet ways of showing love. You love me with your whole heart, and that makes me feel so… alive. You inspire me to be better not because you ask me to, but because you deserve it.",
+        "Before I loved you, I thought I already knew myself. But loving you showed me new parts of my heart soft, brave, patient.",
+        "Even the parts of myself I had never known started to grow because I love you so much sayangku. You helped me discover sides of me I didn’t realize existed. With you, I’ve become more gentle, more understanding, more willing to wait with hope.",
+        "On your birthday, Sayang, I want you to know: you're not just growing older you’re becoming more meaningful in my life every day.\nI wish for happiness, strength, success, and the fulfillment of all your dreams.",
+        "And most of all, I pray that one day, we won’t have to love from afar… but from a closer place where you can hold me without a screen, and I can touch you without tears.",
+        "I love you, Maj sayangku.\nMore than words, more than missing you, and more than you can imagine sayang.\n\nHappy birthday, my love. May Allah always protect you, bless your life with barakah, guide your steps with light, and keep our hearts connected in love and faith until Jannah, sayang. Aamiin.  ❤️"
+    ];
+    
+    // Ini adalah versi HTML dari pesan Anda, untuk ditampilkan SETELAH semua diketik atau saat skip all
+    const fullMessageHTML = `<h1>To Abdulmajed Abdullahi,<br>My Soulmate</h1><p>Who was born on <strong>June 1st, 2003</strong>,</p> <p><strong>Happy birthday, my love.</strong></p> <p>Today, the world celebrates you and I feel even more thankful because you are part of my life.</p> <p>Even though we’re separated by oceans and a 4-hour time difference, my heart has never been far from you. While I may be starting a new day and you're still in the night before, my thoughts are always with you—every hour, every moment.</p> <p>You are my home—one that I can't visit physically, but always return to in my heart.</p> <p>When you say <em>"I miss you"</em> and <em>"I want you,"</em> I feel it too—deeply. Sometimes, I miss you even more than I can express. And when you say you want me, it makes me feel so loved, so wanted—like I truly matter in this world.</p> <p>But there's one thing that always touches me deeply: <strong>when you love me more than I love you.</strong></p> <p>I feel it through your care, your patience, your quiet ways of showing love. You love me with your whole heart, and that makes me feel so… alive. You inspire me to be better—not because you ask me to, but because you deserve it.</p> <p>Before I loved you, I thought I already knew myself. But loving you showed me new parts of my heart—soft, brave, patient.</p> <p>Even the parts of myself I had never known started to grow because I love you. You helped me discover sides of me I didn’t realize existed. With you, I’ve become more gentle, more understanding, more willing to wait with hope.</p> <p>On your birthday, Maj, I want you to know: you're not just growing older—you’re becoming more meaningful in my life every day.</p> <p>I wish for happiness, strength, success, and the fulfillment of all your dreams.</p> <p>And most of all, I pray that one day, we won’t have to love from afar… but from a closer place—where you can hold me without a screen, and I can touch you without tears.</p> <p><strong>I love you, Maj.</strong><br> More than words, more than missing you, and more than you can imagine.</p> <p><strong>Happy birthday, my love. ❤️</strong></p>`;
+
+
+    let currentPageIndex = 0;
+    let charIndex = 0;
+    let currentTypingTimeout; // Untuk menyimpan ID timeout agar bisa di-clear (untuk skip)
+
+    const messageElement = document.getElementById("messageOutput");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    const backToMainBtn = document.getElementById("backToMainBtn");
+
+    function updateButtonStates() {
+        prevBtn.disabled = currentPageIndex === 0;
+        if (currentPageIndex === messagePages.length - 1) {
+            nextBtn.textContent = "FINISH"; // Atau "DONE", atau sembunyikan
+            nextBtn.onclick = finishReading; // Ganti fungsi onclick tombol NEXT di halaman terakhir
+        } else {
+            nextBtn.textContent = "NEXT >";
+            nextBtn.onclick = nextMessage; // Kembalikan ke fungsi nextMessage
+        }
+        nextBtn.disabled = false; // Aktifkan kembali jika sebelumnya di-disable oleh finishReading
+    }
+    
+    function typeMessage() {
+      // Hapus pesan sebelumnya dan reset charIndex
+      if (charIndex === 0) { // Hanya clear jika ini awal dari halaman baru
+        messageElement.textContent = ''; 
+      }
+      
+      const currentPageText = messagePages[currentPageIndex];
+      if (charIndex < currentPageText.length) {
+        messageElement.textContent += currentPageText.charAt(charIndex);
+        charIndex++;
+        currentTypingTimeout = setTimeout(typeMessage, 60); // Kecepatan ketik per karakter (ms)
+        nextBtn.disabled = true; // Disable NEXT saat mengetik
+        prevBtn.disabled = true; // Disable PREV saat mengetik
+        skipBtn.textContent = "SKIP TYPING THIS PAGE";
+      } else {
+        // Selesai mengetik halaman ini
+        nextBtn.disabled = false;
+        prevBtn.disabled = currentPageIndex === 0; // Enable PREV jika bukan halaman pertama
+        skipBtn.textContent = "SKIP TO END / TO INDEX";
+        updateButtonStates(); 
+      }
+    }
+
+    function displayCurrentPageInstantly() {
+        clearTimeout(currentTypingTimeout); // Hentikan ketikan jika sedang berjalan
+        messageElement.textContent = messagePages[currentPageIndex];
+        charIndex = messagePages[currentPageIndex].length; // Tandai seolah sudah selesai diketik
+        updateButtonStates();
+        nextBtn.disabled = false;
+        prevBtn.disabled = currentPageIndex === 0;
+        skipBtn.textContent = "SKIP TO END / TO INDEX";
+    }
+
+    function nextMessage() {
+      if (currentPageIndex < messagePages.length - 1) {
+        currentPageIndex++;
+        charIndex = 0; // Reset untuk halaman baru
+        typeMessage();
+      }
+      updateButtonStates();
+    }
+
+    function prevMessage() {
+      if (currentPageIndex > 0) {
+        currentPageIndex--;
+        charIndex = 0; // Reset untuk halaman baru
+        typeMessage();
+      }
+      updateButtonStates();
+    }
+    
+    function finishReading() {
+        // Setelah semua halaman ditampilkan, tampilkan pesan lengkap dengan format HTML
+        messageElement.innerHTML = fullMessageHTML; // Tampilkan pesan HTML lengkap
+        messageElement.scrollTop = messageElement.scrollHeight; // Scroll ke bawah jika perlu
+        nextBtn.disabled = true;
+        prevBtn.disabled = true;
+        skipBtn.textContent = "BACK TO MAIN MENU";
+        skipBtn.onclick = backToMain; // Ubah fungsi skip menjadi back to main
+        backToMainBtn.style.display = 'none'; // Sembunyikan tombol BACK TO MAIN MENU asli
+    }
+
+
+    function skipMessage() {
+        // Jika sedang mengetik, selesaikan halaman saat ini
+        if (charIndex < messagePages[currentPageIndex].length) {
+            displayCurrentPageInstantly();
+        } else { 
+            // Jika tidak sedang mengetik (sudah selesai 1 halaman, atau sudah di akhir)
+            // Tombol ini bisa berfungsi untuk langsung ke akhir semua pesan & tampilkan HTML
+            // atau langsung kembali ke index.html
+            finishReading(); // Tampilkan semua pesan dengan HTML
+            // Atau jika ingin langsung kembali: window.location.href = "index.html";
+        }
+    }
+
+    function backToMain() {
+      clearTimeout(currentTypingTimeout); // Hentikan proses ketik jika ada
+      window.location.href = "index.html"; 
+    }
+
+    window.onload = function() {
+      if (messagePages.length > 0) {
+        typeMessage();
+        updateButtonStates();
+      } else {
+        messageElement.textContent = "No message available.";
+        nextBtn.disabled = true;
+        prevBtn.disabled = true;
+      }
+    };
+  </script>
+</body>
+</html>
